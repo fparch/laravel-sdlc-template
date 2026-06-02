@@ -160,3 +160,32 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
+
+# Git Workflow & Tagging Strategy
+
+`main` is the finished product **and** the source for a sequential, additive blog series. Keep `main` **linear** — one commit per published step — so readers can `git checkout step-NN` to jump to any milestone.
+
+## Branching
+
+- Do step work on a short-lived branch off the latest `main`, named `step-NN-<slug>` (zero-padded, e.g. `step-03-add-auth`).
+- Use `chore/`, `docs/`, or `fix/` prefixes for non-step changes.
+- Commit freely on the branch; WIP commits are fine since they get squashed.
+
+## Landing a step (squash → merge → tag)
+
+```bash
+git fetch origin && git rebase origin/main      # 1. rebase branch on latest main
+git switch main && git pull --ff-only
+git merge --squash step-NN-<slug>               # 2. collapse into one commit
+git commit -m "step NN: <summary>"
+git tag -a step-NN -m "<summary>"               # 3. annotated, zero-padded tag
+git push origin main step-NN
+git branch -d step-NN-<slug>                     # 4. clean up
+```
+
+## Conventions
+
+- One squashed commit per step keeps `main` history identical to the tutorial progression.
+- Tags are **annotated** and zero-padded (`step-01` … `step-25`).
+- In blog posts, link to **tags** and **compare URLs** (`/compare/step-02...step-03`), never commit SHAs — so re-tagging after edits doesn't break links.
+- To revise a published step: rebase-edit its commit on `main`, move the tag with `git tag -f step-NN`, then `git push --force-with-lease origin main` and `git push -f origin step-NN`.
